@@ -31,6 +31,33 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String question = "";
+  String answer = "";
+  bool isParen = false;
+
+  final List<String> buttons = [
+    'C',
+    'DEL',
+    '%',
+    '÷',
+    '7',
+    '8',
+    '9',
+    '*',
+    '4',
+    '5',
+    '6',
+    '-',
+    '1',
+    '2',
+    '3',
+    '+',
+    '()',
+    '0',
+    '.',
+    '=',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -46,8 +73,6 @@ class _MyHomePageState extends State<MyHomePage> {
       DeviceOrientation.portraitDown,
     ]);
     super.dispose();
-
-    // TextEditingController _calculationController = " ";
   }
 
   @override
@@ -55,32 +80,9 @@ class _MyHomePageState extends State<MyHomePage> {
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
 
-    // This list will later be used in order to later create the buttons
-    final List<String> buttons = [
-      'C',
-      'DEL',
-      '%',
-      '÷',
-      '7',
-      '8',
-      '9',
-      '*',
-      '4',
-      '5',
-      '6',
-      '-',
-      '1',
-      '2',
-      '3',
-      '+',
-      '()',
-      '0',
-      '.',
-      '=',
-    ];
+    // This list will later be used in order to later create the button.
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.menu),
@@ -112,53 +114,133 @@ class _MyHomePageState extends State<MyHomePage> {
 
       body: Column(
         children: [
-          Expanded(child: Container()),
-          _createCalculatorButtons(buttons,screenHeight,screenWidth),
+          _createCalculationResultsWindow(screenWidth, screenHeight),
+          _createCalculatorButtons(screenHeight, screenWidth),
         ],
       ),
     );
   }
 
-  // Widget _createCalculationResultsWindow(
-  //   double screenWidth,
-  //   double screenHeight,
-  // ) {
-  //   return Container(
-  //     padding: EdgeInsets.all(screenWidth * 0.04),
-  //     height: screenHeight * 0.20,
-  //     decoration: BoxDecoration(
-  //       color: Colors.white,
-  //       borderRadius: BorderRadius.circular(screenWidth * 0.02),
-  //       border: Border.all(color: Colors.grey, width: 1),
-  //     ),
-  //     child: Row(
-  //       mainAxisAlignment: MainAxisAlignment.end,
-  //       children: [
-  //         Column(
-  //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-  //           children: [
-  //             IconButton(
-  //               onPressed: () {},
-  //               icon: Icon(Icons.backspace, color: Colors.blue[200]),
-  //             ),
-  //           ],
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
+  Widget _createCalculationResultsWindow(
+    double screenWidth,
+    double screenHeight,
+  ) {
+    return Expanded(
+      child: Container(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Container(
+              padding: EdgeInsets.all(screenWidth * 0.04),
+              alignment: Alignment.centerRight,
+              child: Text(question),
+            ),
+            Container(
+              padding: EdgeInsets.all(screenWidth * 0.04),
+              alignment: Alignment.bottomRight,
+              child: Text(answer),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-  Widget _createCalculatorButtons(List<String> buttons, double screenHeight, double screenWidth) {
+  Widget _createCalculatorButtons(double screenHeight, double screenWidth) {
     return Expanded(
       flex: 2,
       child: Container(
+        // You can change this to change the background from the buttons
+        // color: Colors.lightBlue[100],
         child: GridView.builder(
           itemCount: buttons.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 4,
           ),
           itemBuilder: (BuildContext context, int index) {
+            // Index 0 is meant for the clearing of the entire user input
+            if (index == 0) {
+              return MyButton(
+                action_Pressed: () {
+                  setState(() {
+                    isParen = false;
+                    question = '';
+                  });
+                },
+                color: Colors.green,
+                textColor: Colors.white,
+                buttonText: buttons[index],
+                screenWidth: screenWidth,
+                screenHeight: screenHeight,
+              );
+            } // Index 1 is whenever the user wishes to delete something.
+            else if (index == 1) {
+              return MyButton(
+                action_Pressed: () {
+                  setState(() {
+                    // Check if the last character in the input is a '(' if so keep the isParen variable as false.
+                    if (question[question.length - 1] == '(') {
+                      isParen = false;
+                    }
+                    // Check if the last character in the input is a ')' if so keep the isParen variable as true. 
+                    else if (question[question.length - 1] == ')') {
+                      isParen = true;
+                    }
+                    question = question.substring(0, question.length - 1);
+                  });
+                },
+                color: Colors.red,
+                textColor: Colors.white,
+                buttonText: buttons[index],
+                screenWidth: screenWidth,
+                screenHeight: screenHeight,
+              );
+            }
+            // Index 16 is meant for whenever the user wants to add parentheses to their question.
+            else if (index == 16) {
+              // If the parentheses is false it means its the first time being used thus using the '(' this side of the parentheses.
+              if (isParen == false) {
+                return MyButton(
+                  action_Pressed: () {
+                    setState(() {
+                      // We go ahead and flip the bool to true for the closing paretheses and add the '('
+                      isParen = true;
+                      question += '(';
+                    });
+                  },
+                  color: Colors.blue,
+                  textColor: Colors.white,
+                  buttonText: buttons[index],
+                  screenWidth: screenWidth,
+                  screenHeight: screenHeight,
+                );
+              } else {
+                // If the parentheses is true it means its ready to add the ')' closing paretheses.
+                return MyButton(
+                  action_Pressed: () {
+                    setState(() {
+                      // We go ahead and flip the bool to false for the closing paretheses and add the ')'
+                      // We make our bool false so that the user can keep using the parentheses whenever they want.
+                      isParen = false;
+                      question += ')';
+                    });
+                  },
+                  color: Colors.blue,
+                  textColor: Colors.white,
+                  buttonText: buttons[index],
+                  screenWidth: screenWidth,
+                  screenHeight: screenHeight,
+                );
+              }
+            }
+
+            // Otherwise the rest of the buttons will just continue to operate as usual and just add on to the question variable.
             return MyButton(
+              action_Pressed: () {
+                setState(() {
+                  question += buttons[index];
+                });
+              },
               buttonText: buttons[index],
               color: Colors.blue,
               textColor: Colors.white,
