@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'buttons.dart';
+import 'package:math_expressions/math_expressions.dart';
 
 void main() async {
   runApp(const MyApp());
@@ -84,29 +85,22 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          tooltip: 'Menu I con',
-          onPressed: () {},
-        ),
+        // leading: IconButton(icon: const Icon(Icons.menu), tooltip: 'Menu I con', onPressed: () {}),
 
-        title: Text(
-          'Calculator',
-          style: TextStyle(fontSize: screenWidth * 0.05),
-        ),
+        title: Text('Calculator', style: TextStyle(fontSize: screenWidth * 0.05)),
 
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.history),
-            tooltip: 'History',
-            //Add more Icons here to put them after the history one
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     onPressed: () {},
+        //     icon: const Icon(Icons.history),
+        //     tooltip: 'History',
+        //     //Add more Icons here to put them after the history one
+        //   ),
+        // ],
 
         elevation: 0,
         centerTitle: true,
-        backgroundColor: Colors.blue[200],
+        backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
 
         systemOverlayStyle: SystemUiOverlayStyle.dark,
@@ -121,10 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _createCalculationResultsWindow(
-    double screenWidth,
-    double screenHeight,
-  ) {
+  Widget _createCalculationResultsWindow(double screenWidth, double screenHeight) {
     return Expanded(
       child: Container(
         child: Column(
@@ -133,12 +124,24 @@ class _MyHomePageState extends State<MyHomePage> {
             Container(
               padding: EdgeInsets.all(screenWidth * 0.04),
               alignment: Alignment.centerRight,
-              child: Text(question),
+              child: Text(
+                question,
+                style: TextStyle(
+                  fontSize: screenWidth * 0.06,
+                  color: Colors.black,
+                ),
+              ),
             ),
             Container(
               padding: EdgeInsets.all(screenWidth * 0.04),
               alignment: Alignment.bottomRight,
-              child: Text(answer),
+              child: Text(
+                answer,
+                style: TextStyle(
+                  fontSize: screenWidth * 0.04,
+                  color: Colors.grey[900]
+                ),
+              ),
             ),
           ],
         ),
@@ -154,102 +157,149 @@ class _MyHomePageState extends State<MyHomePage> {
         // color: Colors.lightBlue[100],
         child: GridView.builder(
           itemCount: buttons.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4,
-          ),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
           itemBuilder: (BuildContext context, int index) {
             // Index 0 is meant for the clearing of the entire user input
             if (index == 0) {
-              return MyButton(
-                action_Pressed: () {
-                  setState(() {
-                    isParen = false;
-                    question = '';
-                  });
-                },
-                color: Colors.green,
-                textColor: Colors.white,
-                buttonText: buttons[index],
-                screenWidth: screenWidth,
-                screenHeight: screenHeight,
-              );
-            } // Index 1 is whenever the user wishes to delete something.
-            else if (index == 1) {
-              return MyButton(
-                action_Pressed: () {
-                  setState(() {
-                    // Check if the last character in the input is a '(' if so keep the isParen variable as false.
-                    if (question[question.length - 1] == '(') {
-                      isParen = false;
-                    }
-                    // Check if the last character in the input is a ')' if so keep the isParen variable as true. 
-                    else if (question[question.length - 1] == ')') {
-                      isParen = true;
-                    }
-                    question = question.substring(0, question.length - 1);
-                  });
-                },
-                color: Colors.red,
-                textColor: Colors.white,
-                buttonText: buttons[index],
-                screenWidth: screenWidth,
-                screenHeight: screenHeight,
-              );
+              return _returnClearButton(screenWidth, screenHeight, index);
+            } else if (index == 1) {
+              // Index 1 is whenever the user wishes to delete something.
+              return _returnDelButton(screenWidth, screenHeight, index);
+            } else if (index == 16) {
+              // Index 16 is meant for whenever the user wants to add parentheses to their question.
+              return _returnParenthesesCheck(screenWidth, screenHeight, index);
+            } else if (index == 19) {
+              return _returnEqualsAns(screenWidth, screenHeight, index);
+            } else {
+              // Otherwise the rest of the buttons will just continue to operate as usual and just add on to the question variable.
+              return _clickableButtons(screenWidth, screenHeight, index);
             }
-            // Index 16 is meant for whenever the user wants to add parentheses to their question.
-            else if (index == 16) {
-              // If the parentheses is false it means its the first time being used thus using the '(' this side of the parentheses.
-              if (isParen == false) {
-                return MyButton(
-                  action_Pressed: () {
-                    setState(() {
-                      // We go ahead and flip the bool to true for the closing paretheses and add the '('
-                      isParen = true;
-                      question += '(';
-                    });
-                  },
-                  color: Colors.blue,
-                  textColor: Colors.white,
-                  buttonText: buttons[index],
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                );
-              } else {
-                // If the parentheses is true it means its ready to add the ')' closing paretheses.
-                return MyButton(
-                  action_Pressed: () {
-                    setState(() {
-                      // We go ahead and flip the bool to false for the closing paretheses and add the ')'
-                      // We make our bool false so that the user can keep using the parentheses whenever they want.
-                      isParen = false;
-                      question += ')';
-                    });
-                  },
-                  color: Colors.blue,
-                  textColor: Colors.white,
-                  buttonText: buttons[index],
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                );
-              }
-            }
-
-            // Otherwise the rest of the buttons will just continue to operate as usual and just add on to the question variable.
-            return MyButton(
-              action_Pressed: () {
-                setState(() {
-                  question += buttons[index];
-                });
-              },
-              buttonText: buttons[index],
-              color: Colors.blue,
-              textColor: Colors.white,
-              screenHeight: screenHeight,
-              screenWidth: screenWidth,
-            );
           },
         ),
       ),
     );
+  }
+
+  Widget _returnClearButton(double screenWidth, double screenHeight, int index) {
+    return MyButton(
+      action_Pressed: () {
+        setState(() {
+          isParen = false;
+          question = '';
+          answer = '';
+        });
+      },
+      color: Colors.green,
+      textColor: Colors.white,
+      buttonText: buttons[index],
+      screenWidth: screenWidth,
+      screenHeight: screenHeight,
+    );
+  }
+
+  Widget _returnDelButton(double screenWidth, double screenHeight, int index) {
+    return MyButton(
+      action_Pressed: () {
+        setState(() {
+          // Check if the last character in the input is a '(' if so keep the isParen variable as false.
+          if (question[question.length - 1] == '(') {
+            isParen = false;
+          }
+          // Check if the last character in the input is a ')' if so keep the isParen variable as true.
+          else if (question[question.length - 1] == ')') {
+            isParen = true;
+          }
+          question = question.substring(0, question.length - 1);
+        });
+      },
+      color: Colors.red,
+      textColor: Colors.white,
+      buttonText: buttons[index],
+      screenWidth: screenWidth,
+      screenHeight: screenHeight,
+    );
+  }
+
+  Widget _returnParenthesesCheck(double screenWidth, double screenHeight, int index) {
+    // If the parentheses is false it means its the first time being used thus using the '(' this side of the parentheses.
+    if (isParen == false) {
+      return MyButton(
+        action_Pressed: () {
+          setState(() {
+            // We go ahead and flip the bool to true for the closing paretheses and add the '('
+            isParen = true;
+            question += '(';
+          });
+        },
+        color: Colors.blue,
+        textColor: Colors.white,
+        buttonText: buttons[index],
+        screenWidth: screenWidth,
+        screenHeight: screenHeight,
+      );
+    } else {
+      // If the parentheses is true it means its ready to add the ')' closing paretheses.
+      return MyButton(
+        action_Pressed: () {
+          setState(() {
+            // We go ahead and flip the bool to false for the closing paretheses and add the ')'
+            // We make our bool false so that the user can keep using the parentheses whenever they want.
+            isParen = false;
+            question += ')';
+          });
+        },
+        color: Colors.blue,
+        textColor: Colors.white,
+        buttonText: buttons[index],
+        screenWidth: screenWidth,
+        screenHeight: screenHeight,
+      );
+    }
+  }
+
+  Widget _returnEqualsAns(double screenWidth, double screenHeight, int index) {
+    return MyButton(
+      action_Pressed: () {
+        setState(() {
+          equalPressed();
+        });
+      },
+      color: Colors.blue,
+      textColor: Colors.white,
+      buttonText: buttons[index],
+      screenWidth: screenWidth,
+      screenHeight: screenHeight,
+    );
+  }
+
+  Widget _clickableButtons(double screenWidth, double screenHeight, int index) {
+    return MyButton(
+      action_Pressed: () {
+        setState(() {
+          question += buttons[index];
+        });
+      },
+      buttonText: buttons[index],
+      color: Colors.blue,
+      textColor: Colors.white,
+      screenHeight: screenHeight,
+      screenWidth: screenWidth,
+    );
+  }
+
+  void equalPressed() {
+    String finalQuestion = question;
+
+    // Creates our expression parser
+    ExpressionParser p = GrammarParser();
+
+    // Will save the parsed expression to the our exp variable.
+    Expression exp = p.parse(finalQuestion);
+
+    ContextModel cm = ContextModel();
+
+    double eval = exp.evaluate(EvaluationType.REAL, cm);
+
+    answer = eval.toString();
   }
 }
