@@ -1,10 +1,16 @@
 # calculator_app
 
-A new Flutter project.
+Flutter Calculator App
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+This Project is a simple calculator app with a simple UI/UX design.
+Completely meant to just do the one thing it was desinged to be which is a
+Calculator.
+
+Note: As of right now the app is done being made. However, this does not mean im done.
+I do intend to expand this app even further potentially adding some unit conversion capabilities 
+in the near future.
 
 A few resources to get you started if this is your first Flutter project:
 
